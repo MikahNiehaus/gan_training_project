@@ -203,7 +203,7 @@ class GANTrainer:
         for param_group in self.opt_G.param_groups:
             param_group['lr_init'] = 0.0002
         for param_group in self.opt_D.param_groups:
-            param_group['lr_init'] = 0.00002
+            param_group['lr_init'] = 0.0001
         # Remove learning rate schedulers for G and D (no LR decay)
         self.scheduler_G = None
         self.scheduler_D = None
@@ -883,19 +883,32 @@ if __name__ == '__main__':
 
     if args.command == 'train':
         print(f"[INFO] Resolutions: {RESOLUTIONS}")
+        
+        # Load values from config.yaml
         try:
-            res = int(input(f"Enter training resolution {RESOLUTIONS}: "))
+            import yaml
+            with open('config.yaml', 'r') as f:
+                config = yaml.safe_load(f)
+            
+            # Get resolution from config file
+            res = config.get('resolution', RESOLUTIONS[0])
             if res not in RESOLUTIONS:
-                raise ValueError()
-        except Exception:
-            print(f"[WARN] Invalid resolution. Using {RESOLUTIONS[0]}")
+                print(f"[WARN] Invalid resolution in config. Using {RESOLUTIONS[0]}")
+                res = RESOLUTIONS[0]
+            else:
+                print(f"[INFO] Using resolution {res}x{res} from config file")
+                
+            # Get epochs from config file
+            epochs = config.get('epochs', 200)
+            if not isinstance(epochs, int) or epochs < 1:
+                print("[WARN] Invalid epoch count in config. Using 200.")
+                epochs = 200
+            else:
+                print(f"[INFO] Training for {epochs} epochs from config file")
+        except Exception as e:
+            print(f"[ERROR] Could not load config.yaml: {e}")
+            print(f"[INFO] Using default resolution {RESOLUTIONS[0]} and 200 epochs")
             res = RESOLUTIONS[0]
-        try:
-            epochs = int(input("Epochs (min 1): "))
-            if epochs < 1:
-                raise ValueError()
-        except Exception:
-            print("[WARN] Invalid epoch count. Using 200.")
             epochs = 200
         
         # Adjust batch size for higher resolutions to prevent VRAM issues

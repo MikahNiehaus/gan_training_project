@@ -1,0 +1,86 @@
+# GAN Training Configuration
+
+# Basic Settings
+seed: 42
+device: 'auto'  # 'auto', 'cuda', or 'cpu'
+
+# Model Architecture
+z_dim: 100
+img_channels: 3
+
+# Training Parameters
+learning_rate_g: 0.0002
+learning_rate_d: 0.00005
+adam_betas: [0.5, 0.999]
+use_neighbor_penalty: true
+neighbor_penalty_lambda: 0.5
+use_distortion: true
+manual_distortion_scale: 0.2
+
+# Command and Mode Settings
+training_command: 'progressive'  # 'train', 'sample', 'progressive', or 'save_full_model'
+resolution: 64  # Target resolution for training/sampling
+epochs: 50000 # Number of epochs (null uses min_epochs_per_res)
+start_res_idx: 0  # Start resolution index for progressive training
+max_res_idx: null  # Max resolution index (null means highest available)
+
+# Progressive Growing
+progressive_growing: true
+resolutions: [32, 64, 128, 256, 512, 720, 1080]
+min_epochs_per_res:
+  32: 100
+  64: 200
+  128: 300
+  256: 400
+  512: 600
+  720: 800
+  1080: 1200
+
+# Batch Size Strategy
+base_batch_size: 32
+batch_size_strategy:
+  32: 32
+  64: 32
+  128: 16
+  256: 16
+  512: 8
+  720: 4
+  1080: 2
+
+# Data Settings
+data_dir: './data'
+train_dir: './data/train'
+test_dir: './data/test'
+sample_dir: './data/gan_samples'
+augment_data: true
+augment_target_size: 20000
+preload_to_ram: false
+cache_tensors: false
+dataloader_workers: 4
+dataloader_pin_memory: true
+dataloader_persistent_workers: true
+
+# Saving & Checkpoints
+checkpoint_path: './data/gan_checkpoint.pth'
+full_model_path: './data/gan_full_model.pth'
+sample_interval: 100
+checkpoint_interval: 100
+save_epoch_checkpoint_interval: 1000
+
+# Optimization
+enable_gradient_checkpointing: true
+initial_checkpointing_level: 0
+enable_amp: false  # Automatic Mixed Precision
+
+# Advanced Features
+pixel_perfect_matching: false
+reference_image_path: null  # Path to reference image for pixel-perfect matching
+fixed_seed: 1234
+show_progress_bar: true
+
+# VRAM Optimization
+vram_optimization:
+  auto_reduce_batch_size: true
+  auto_reduce_learning_rates: true
+  max_checkpointing_level: 3
+  max_vram_retries: 3
